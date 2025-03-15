@@ -1,70 +1,75 @@
-# Radiosonde Data Processing and Skew-T Diagram Generation
+# **Radiosonde Intercomparison Project**
 
-This project processes radiosonde data files, extracts relevant atmospheric data, and generates Skew-T diagrams for meteorological analysis. The script selects specific files based on their timestamps, removes duplicate pressure values, and computes thermodynamic parameters using the MetPy library.
+## **Project Overview**
+This project processes and visualizes data from two types of radiosonde launches:
+- **Sonde** – TRACER ozonesonde data files
+- **M1** – TRACER M1 radiosonde data files
 
-There are three functions, one for files at 11 UTC, another for 17 UTC, and the last one for overlapping the two SkewTs from the same date.
+The primary goal is to compare the measurements from these two sources and analyze whether there are any systematic biases between them.
 
-## Functions
+## **Motivation**
+Radiosonde data is crucial for understanding atmospheric conditions, including temperature, humidity, wind, and pressure. By comparing data from sonde and M1 radiosondes, this project aims to identify any discrepancies or biases, which could improve the accuracy of future atmospheric measurements.
 
-- `skewT_generator_11(input_folder, output_folder)`: Generates SkewT, Hodograph, and a Stats section for files with sonde data from 11 UTC.
-- `skewT_generator_17(input_folder, output_folder)`: Generates SkewT, Hodograph, and a Stats section for files with sonde data from 17 UTC.
-- `overlapping_skewTs(input_folder, output_folder)`: Generates SkewT by overlapping the data from the same days.
+## **How It Works**
+### **1. Sonde Data Processing**
+- `sonde.py` reads sonde data files, processes the data, and generates Skew-T diagrams, Hodographs, and statistics showing temperature, dew point, and wind profiles. There are two SkewTs from the same day (1100 UTC and 1500UTC)
+- Data is filtered and cleaned to remove missing or flagged values.
+![Sonde Plot](TRACER%20Sonde/Plots/TRACERSonde.20220706.1118.stats.png)
 
-## Features
+### **2. M1 Data Processing**
+- `skewt_hodo_stats.py` will follow a similar structure to `sonde.py` to process M1 data files but for 1130 UTC and 1730UTC.
+![TRACER M1 Plot](TRACER_M1/Plots/TRACERM1.20220706.112900.stats.png)
 
-- **Automated File Selection**: Processes files matching specific timestamps (11XX or 17XX hours).
-- **Data Cleaning**: Removes duplicate pressure values to ensure accurate calculations.
-- **Skew-T Diagram Generation**: Plots temperature, dew point, and other fiducial lines.
-- **CAPE/CIN Calculations**: Computes Convective Available Potential Energy (CAPE) and Convective Inhibition (CIN) using MetPy.
-- **Legend Positioning**: Ensures the legend is always positioned within the top-right corner of the plot.
+### **3. Combined Plotting**
+- `sonde_combiner.py` reads and processes data from the sonde files again with matching dates and creates combined Skew-T plots for side-by-side comparison. This process is carried within the `skewt_hodo_stats.py` for M1 files.
+- Pressure consistency is verified, and parcel paths, CAPE, CIN, and LCL/LFC/EL pressures are calculated.
+![Combined Plot](TRACER%20Sonde/Plots/Combined/TRACERSonde.20220805.png)
 
-## Prerequisites
+### **4. Three-Grid Visualization**
+- `sonde_image_combiner.py` combines individual sonde and combined plots into a single three-panel grid.
+-  `image_combiner.py` combines individual M1 and combined plots into a single three-panel grid.
+![Three Grid](TRACER_M1/Plots/Three-Grid/TRACERM1.09-13-2022.three-grid.png)
 
-- Python 3.x
-- Required Libraries:
-  - numpy
-  - pandas
-  - metpy
-  - matplotlib
-  - jupyter notebook
+## **Goals**
+- Generate consistent Skew-T plots from both sonde and M1 radiosonde data  
+- Create combined plots for intercomparison  
+- Identify and analyze any systematic biases between the two data sources  
 
-## Installation
-
-1. Clone the repository:
-   ```sh
-   git clone https://github.com/priom-mahatab/Physics-Research.git
-   ```
-2. Install dependencies:
-   ```sh
-   pip install numpy pandas metpy matplotlib jupyter
-   ```
-
-## Usage
-
-Run the script to process radiosonde data and generate Skew-T diagrams:
-
-```sh
-jupyter notebook "TRACER M1.ipynb"
+## **Setup**
+### **1. Create Virtual Environment**
+```bash
+conda create -n radiosonde_env python=3.10
+conda activate radiosonde_env
 ```
 
-### Handling Errors
+### **2. Install Dependencies**
+```bash
+pip install -r requirements.txt
+```
 
-- **Duplicate Pressure Warnings**: The script automatically removes duplicate pressure values.
-- **MetPy Calculation Errors**: If a calculation fails, the script gracefully skips the affected computation.
+### **3. Run Processing Scripts**
+- Process sonde data:
+```bash
+python sonde.py
+```
+- Process M1 data:
+```bash
+python m1.py
+```
+- Generate combined plots:
+```bash
+python sonde_combiner.py
+```
+- Create three-grid visualizations:
+```bash
+python sonde_image_combiner.py
+```
 
-## Output
-
-- Processed Skew-T diagrams are saved in the `output/` directory with unique filenames based on the input data.
-
-## Notes
-
-- Ensure the input CSV files follow the naming convention: `housondewnpnM1.b1.YYYYMMDD.HHMMSS.custom.csv`.
-- Adjust the legend positioning in the plot by modifying:
-  ```python
-  skew.ax.legend(loc='upper right', bbox_to_anchor=(0.85, 1), fontsize=10, frameon=True)
-  ```
-
-## License
-
-This project is licensed under the MIT License.
-
+## **Requirements**
+- Python 3.10
+- Required packages (see `requirements.txt`)
+  - `metpy`
+  - `numpy`
+  - `pandas`
+  - `matplotlib`
+  - `Pillow`
